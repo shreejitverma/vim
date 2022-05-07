@@ -14,32 +14,28 @@ conv = binhex.HexBin(input)
 info = conv.FInfo
 out = conv.FName
 out_data = out
-out_rsrc = out + '.rsrcfork'
+out_rsrc = f'{out}.rsrcfork'
 
 # This uses the print statement on Python 2, print function on Python 3.
 #print('out_rsrc=' + out_rsrc)
-print('In file: ' + input)
+print(f'In file: {input}')
 
-outfile = open(out_data, 'wb')
-print('  Out data fork: ' + out_data)
-while 1:
-    d = conv.read(128000)
-    if not d: break
-    outfile.write(d)
-outfile.close()
-conv.close_data()
-
-d = conv.read_rsrc(128000)
-if d:
-    print('  Out rsrc fork: ' + out_rsrc)
-    outfile = open(out_rsrc, 'wb')
-    outfile.write(d)
+with open(out_data, 'wb') as outfile:
+    print(f'  Out data fork: {out_data}')
     while 1:
-        d = conv.read_rsrc(128000)
+        d = conv.read(128000)
         if not d: break
         outfile.write(d)
-    outfile.close()
+conv.close_data()
 
+if d := conv.read_rsrc(128000):
+    print(f'  Out rsrc fork: {out_rsrc}')
+    with open(out_rsrc, 'wb') as outfile:
+        outfile.write(d)
+        while 1:
+            d = conv.read_rsrc(128000)
+            if not d: break
+            outfile.write(d)
 conv.close()
 
 # vim:set ts=8 sts=4 sw=4 et:
